@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lista de Presentes – Matheus e Gabriela</title>
+<style>
+body { font-family: 'Arial', sans-serif; background-color: #fdf6f0; color: #333; margin:0; padding:0; }
+header { background-color: #d9b99b; padding: 20px; text-align: center; color: #fff; }
+h1 { margin:0; }
+.container { padding: 20px; max-width: 600px; margin: auto; }
+.hidden { display:none; }
+input[type=text] { padding:10px; width:80%; margin-right:10px; }
+button { padding:10px 20px; background-color:#b28e7b; color:#fff; border:none; cursor:pointer; border-radius:5px; }
+button:disabled { background-color:#ccc; cursor:not-allowed; }
+.item { border:1px solid #e0cfc1; padding:10px; margin:10px 0; border-radius:5px; display:flex; justify-content:space-between; align-items:center; }
+.item.done { background-color:#e0e0e0; color:#999; }
+</style>
+</head>
+<body>
+
+<header>
+<h1>Lista de Presentes – Matheus e Gabriela</h1>
+</header>
+
+<div class="container">
+
+<div id="loginDiv">
+<p>Digite seu nome para acessar a lista:</p>
+<input type="text" id="userName" placeholder="Seu nome">
+<button onclick="enterList()">Entrar</button>
+</div>
+
+<div id="listDiv" class="hidden">
+<h2>Escolha seu presente</h2>
+<div id="giftList"></div>
+</div>
+
+</div>
+
+<script>
+let gifts = [
+    {desc:"Jogo de Toalhas", qty:2, status:"Disponível"},
+    {desc:"Conjunto de Pratos", qty:1, status:"Disponível"},
+    {desc:"Panela de Pressão", qty:1, status:"Disponível"},
+    {desc:"Jogo de Cama Queen", qty:1, status:"Disponível"},
+    {desc:"Conjunto de Taças", qty:2, status:"Disponível"}
+];
+
+let userName = "";
+
+function enterList(){
+    const nameInput = document.getElementById('userName').value.trim();
+    if(nameInput===""){ alert("Digite seu nome!"); return; }
+    userName = nameInput;
+    document.getElementById('loginDiv').classList.add('hidden');
+    document.getElementById('listDiv').classList.remove('hidden');
+    renderList();
+}
+
+function renderList(){
+    const container = document.getElementById('giftList');
+    container.innerHTML = "";
+    gifts.forEach((gift,index)=>{
+        const div = document.createElement('div');
+        div.className = "item";
+        if(gift.status==="Já escolhido") div.classList.add('done');
+
+        div.innerHTML = `<span>${gift.desc} (${gift.qty})</span>
+                         <button ${gift.status==="Já escolhido"?"disabled":""} onclick="chooseGift(${index})">
+                         ${gift.status==="Já escolhido"?"Já escolhido":"Escolher"}</button>`;
+        container.appendChild(div);
+    });
+}
+
+function chooseGift(index){
+    gifts[index].status = "Já escolhido";
+    renderList();
+    saveToSheet(gifts[index]);
+}
+
+function saveToSheet(gift){
+    fetch('https://script.google.com/macros/s/AKfycbwSc8Ab5APxwERmPfxi_nx7qAUT8WhAhvC-Jmc_2TO0hBpoxLqbDEwlPx6HSEqMvHp7/exec?nome='+encodeURIComponent(userName)+'&presente='+encodeURIComponent(gift.desc))
+    .then(response=>response.json())
+    .then(data=>{ console.log(data); })
+    .catch(err=>console.error(err));
+}
+</script>
+
+</body>
+</html>
